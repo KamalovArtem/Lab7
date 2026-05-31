@@ -1,0 +1,44 @@
+---
+# Шаг 4: Установка программного обеспечения
+
+- name: Установка ПО на студенческие ПК
+  hosts: students
+  become: true
+
+  tasks:
+    - name: Обновить apt-кеш
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Установить пакеты для студентов (python3, git, vim, gcc)
+      ansible.builtin.apt:
+        name:
+          - python3
+          - git
+          - vim
+          - gcc
+        state: present
+
+- name: Установка ПО на преподавательский ПК
+  hosts: teacher
+  become: true
+
+  tasks:
+    - name: Обновить apt-кеш
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Установить пакеты для преподавателя (python3, gcc)
+      ansible.builtin.apt:
+        name:
+          - python3
+          - gcc
+        state: present
+
+    - name: Удалить пакет git (если установлен)
+      ansible.builtin.apt:
+        name: git
+        state: absent
+        purge: true

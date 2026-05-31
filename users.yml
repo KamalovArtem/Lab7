@@ -1,0 +1,61 @@
+---
+# Шаг 2: Настройка пользователей и SSH-доступа
+# Перед запуском сгенерируйте ключи: bash generate_keys.sh
+
+- name: Настройка пользователей и SSH-доступа
+  hosts: all
+  become: true
+
+  tasks:
+    # --- Для всех хостов: создать группу students ---
+    - name: Создать группу students (GID=2000)
+      ansible.builtin.group:
+        name: students
+        gid: 2000
+        state: present
+
+    # --- Для студенческих ПК: создать пользователя student ---
+    - name: Создать пользователя student
+      ansible.builtin.user:
+        name: student
+        uid: 2000
+        group: students
+        password: "{{ '123' | password_hash('sha512') }}"
+        shell: /bin/bash
+        create_home: true
+        state: present
+      when: inventory_hostname in groups['students']
+
+    - name: Скопировать публичный SSH-ключ для student
+      ansible.posix.authorized_key:
+        user: student
+        state: present
+        key: "{{ lookup('file', 'keys/student_key.pub') }}"
+      when: inventory_hostname in groups['students']
+
+    # --- Для преподавательского ПК: создать группу professor и пользователя professor ---
+    - name: Создать группу professor
+      ansible.builtin.group:
+        name: professor
+        state: present
+      when: inventory_hostname in groups['teacher']
+
+    - name: Создать пользователя professor
+      ansible.builtin.user:
+        name: professor
+        group: professor
+        groups:
+          - professor
+          - sudo
+        password: "{{ 'Te@cher2024' | password_hash('sha512') }}"
+        shell: /bin/bash
+        create_home: true
+        state: present
+      when: inventory_hostname in groups['teacher']
+
+    - name: Скопировать публичный SSH-ключ для professor
+      ansible.posix.authorized_key:
+        user: professor
+        state: present
+        key: "{{ lookup('file', 'keys/professor_key.pub') }}"
+      when: inventory_hostname in groups['teacher']

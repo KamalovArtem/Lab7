@@ -1,0 +1,58 @@
+---
+# Шаг 3: Настройка сети
+# Замена репозиториев на яндексовые зеркала + добавление Google DNS 8.8.8.8
+
+- name: Настройка сети
+  hosts: all
+  become: true
+
+  tasks:
+    # --- Замена репозиториев на Яндекс ---
+    - name: Создать резервную копию sources.list
+      ansible.builtin.copy:
+        src: /etc/apt/sources.list
+        dest: /etc/apt/sources.list.bak
+        remote_src: true
+        force: false
+
+    - name: Заменить sources.list на яндексовое зеркало (Ubuntu 22.04 / jammy)
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list
+        content: |
+          deb http://mirror.yandex.ru/ubuntu jammy main restricted universe multiverse
+          deb http://mirror.yandex.ru/ubuntu jammy-updates main restricted universe multiverse
+          deb http://mirror.yandex.ru/ubuntu jammy-backports main restricted universe multiverse
+          deb http://mirror.yandex.ru/ubuntu jammy-security main restricted universe multiverse
+        owner: root
+        group: root
+        mode: '0644'
+
+    # --- Добавление Google DNS 8.8.8.8 ---
+    - name: Проверить наличие /etc/resolv.conf
+      ansible.builtin.stat:
+        path: /etc/resolv.conf
+      register: resolv_stat
+
+    - name: Добавить Google DNS в /etc/resolv.conf (если не добавлен)
+      ansible.builtin.lineinfile:
+        path: /etc/resolv.conf
+        line: "nameserver 8.8.8.8"
+        state: present
+        insertbefore: BOF
+      when: resolv_stat.stat.exists
+
+    # Если используется systemd-resolved — настроить через /etc/systemd/resolved.conf
+    - name: Добавить Google DNS в systemd-resolved (если используется)
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/resolved.conf
+        regexp: '^#?DNS='
+        line: 'DNS=8.8.8.8'
+        state: present
+      notify: Перезапустить systemd-resolved
+      ignore_errors: true
+
+  handlers:
+    - name: Перезапустить systemd-resolved
+      ansible.builtin.service:
+        name: systemd-resolved
+        state: restarted

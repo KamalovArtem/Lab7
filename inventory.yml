@@ -1,0 +1,31 @@
+all:
+  children:
+    students:
+      hosts:
+        student1:
+          ansible_host: student1
+        student2:
+          ansible_host: student2
+        student3:
+          ansible_host: student3
+        student4:
+          ansible_host: student4
+        student5:
+          ansible_host: student5
+        student6:
+          ansible_host: student6
+        student7:
+          ansible_host: student7
+        student8:
+          ansible_host: student8
+        student9:
+          ansible_host: student9
+    teacher:
+      hosts:
+        teacher:
+          ansible_host: teacher
+
+  vars:
+    ansible_user: root
+    ansible_password: root
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

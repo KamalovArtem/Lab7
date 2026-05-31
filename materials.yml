@@ -1,0 +1,46 @@
+---
+# Шаг 5: Развёртывание учебных материалов
+
+- name: Развёртывание материалов для студентов
+  hosts: students
+  become: true
+
+  tasks:
+    - name: Создать директорию /home/student/materials
+      ansible.builtin.file:
+        path: /home/student/materials
+        state: directory
+        owner: student
+        group: students
+        mode: '0755'
+
+    - name: Скопировать содержимое student_materials/ в /home/student/materials
+      ansible.builtin.copy:
+        src: student_materials/
+        dest: /home/student/materials/
+        owner: student
+        group: students
+        mode: '0644'
+        directory_mode: '0755'
+
+- name: Развёртывание материалов для преподавателя
+  hosts: teacher
+  become: true
+
+  tasks:
+    - name: Создать директорию /home/professor/materials
+      ansible.builtin.file:
+        path: /home/professor/materials
+        state: directory
+        owner: professor
+        group: professor
+        mode: '0755'
+
+    - name: Скопировать содержимое teacher_materials/ в /home/professor/materials
+      ansible.builtin.copy:
+        src: teacher_materials/
+        dest: /home/professor/materials/
+        owner: professor
+        group: professor
+        mode: '0644'
+        directory_mode: '0755'
