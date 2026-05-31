@@ -1,0 +1,39 @@
+all:
+  children:
+    students:
+      hosts:
+        student1:
+          ansible_host: localhost
+          ansible_connection: local
+        student2:
+          ansible_host: localhost
+          ansible_connection: local
+        student3:
+          ansible_host: localhost
+          ansible_connection: local
+        student4:
+          ansible_host: localhost
+          ansible_connection: local
+        student5:
+          ansible_host: localhost
+          ansible_connection: local
+        student6:
+          ansible_host: localhost
+          ansible_connection: local
+        student7:
+          ansible_host: localhost
+          ansible_connection: local
+        student8:
+          ansible_host: localhost
+          ansible_connection: local
+        student9:
+          ansible_host: localhost
+          ansible_connection: local
+    teacher:
+      hosts:
+        teacher:
+          ansible_host: localhost
+          ansible_connection: local
+
+  vars:
+    ansible_user: root
